@@ -1,0 +1,9 @@
+[
+	{ "$lookup": {"from": "epic", "localField": "_id", "foreignField": "project", "as": "projectObjects" }},
+	{ "$unwind":"$projectObjects"},
+	{ "$project": { "_schemaName":"$_schemaName", "projectName":"$name", "objectType": "$projectObjects._schemaName"} },
+	{ "$group":{"_id": { "projectName": "$projectName", "objectType": "$objectType" },"count":{"$sum":1}}},
+	{ "$project": { "_projectName":"$_id.projectName", "_objectType":"$_id.objectType", "_count": "$count"} },
+	{ "$project": { "_id":0, "projectName":"$_projectName", "objectType":"$_objectType", "count": "$_count"} },
+	{ "$sort":{"projectName":1, "objectType":1}}
+]

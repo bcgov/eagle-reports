@@ -1,0 +1,151 @@
+[
+	{"$match": {"performedBy":{"$eq":"idir\\theidirusername"}}}
+	,{"$match": {"objId": {"$ne": null}}}
+	,{"$match":{"$or":[{"action":{"$eq":"publish"}},{"action":{"$eq":"unPublish"}}]}}	
+	,{"$lookup": {
+		"from": "epic"
+		,"let": { "epicId": "$objId" }
+		,"pipeline": [
+			{ "$match":
+				{ "$expr":
+					{ "$eq": [ "$_id",  "$$epicId" ] }
+				}
+			}
+			,{ "$project": { 
+				"projectId":"$project"
+				,"objectType":"$_schemaName"
+				,"documentDisplayName":"$displayName"
+				,"commentStatus":"$eaoStatus"
+				,"commentPeriodIsClassified":"$isClassified"
+				,"commentPeriodIsPublished":"$isPublished"
+				,"commentPeriodIsResolved":"$isResolved"
+				,"commentPeriodIsVetted":"$isVetted"
+				,"recentActivityHeadline":"$headline"
+				,"recentActivityPinned":"$pinned" 
+				,"recentActivityActive":"$active" } }
+		]
+		,"as": "epicObjects" }}
+	,{"$unwind": "$epicObjects"}
+	,{"$project": {
+		"updatedBy":"$updatedBy"
+		,"addedBy":"$addedBy"
+		,"delete":"$delete"
+		,"_schemaName":"$_schemaName"
+		,"timestamp":"$timestamp"
+		,"read":"$read"
+		,"action":"$action"
+		,"deletedBy":"$deletedBy"
+		,"objectId":"$objId"
+		,"objectType": "$epicObjects.objectType"
+		,"documentDisplayName": "$epicObjects.documentDisplayName"
+		,"commentStatus": "$epicObjects.commentStatus"
+		,"commentPeriodIsClassified": "$epicObjects.commentPeriodIsClassified"
+		,"commentPeriodIsPublished": "$epicObjects.commentPeriodIsPublished"
+		,"commentPeriodIsResolved": "$epicObjects.commentPeriodIsResolved"
+		,"commentPeriodIsVetted": "$epicObjects.commentPeriodIsVetted"
+		,"recentActivityHeadline": "$epicObjects.recentActivityHeadline"
+		,"recentActivityPinned": "$epicObjects.recentActivityPinned"
+		,"recentActivityActive": "$epicObjects.recentActivityActive"
+		,"projectId": "$epicObjects.projectId"
+		,"_id":"$_id"
+		,"meta":"$meta"
+		,"write":"$write"
+		,"performedBy":"$performedBy"
+		,"_objectSchema":"$_objectSchema"
+	}}
+    ,{"$lookup": {
+		"from": "epic"
+		,"let": { "epicId": "$projectId" }
+		,"pipeline": [
+			{ "$match":
+				{ "$expr":
+					{ "$and":
+						[
+							{ "$eq": [ "$_id",  "$$epicId" ] },
+							{ "$eq": [ "$_schemaName", "Project" ] }
+						]
+					}
+				}
+			}
+			,{ "$project": { 
+				"_id":0
+				,"name":"$name" } }
+		]
+		,"as": "projectObjects" }}
+	,{"$unwind": "$projectObjects"}
+	,{"$sort":{"timestamp":-1}}
+	,{"$project": {
+		"updatedBy":"$updatedBy"
+		,"addedBy":"$addedBy"
+		,"delete":"$delete"
+		,"_schemaName":"$_schemaName"
+		,"timestamp":"$timestamp"
+		,"read":"$read"
+		,"action":"$action"
+		,"deletedBy":"$deletedBy"
+		,"objectId":"$objectId"
+		,"objectType": "$objectType"
+		,"documentDisplayName": {
+			"$cond": {
+				"if": { "$eq": [ "Document", "$objectType" ] },
+				"then": "$documentDisplayName",
+				"else": "$$REMOVE"
+			}}
+		,"commentStatus": {
+			"$cond": {
+				"if": { "$eq": [ "Comment", "$objectType" ] },
+				"then": "$commentStatus",
+				"else": "$$REMOVE"
+			}}
+		,"commentPeriodIsClassified": {
+			"$cond": {
+				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
+				"then": "$commentPeriodIsClassified",
+				"else": "$$REMOVE"
+			}}
+		,"commentPeriodIsPublished": {
+			"$cond": {
+				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
+				"then": "$commentPeriodIsPublished",
+				"else": "$$REMOVE"
+			}}
+		,"commentPeriodIsResolved": {
+			"$cond": {
+				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
+				"then": "$commentPeriodIsResolved",
+				"else": "$$REMOVE"
+			}}
+		,"commentPeriodIsVetted": {
+			"$cond": {
+				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
+				"then": "$commentPeriodIsVetted",
+				"else": "$$REMOVE"
+			}}
+		,"recentActivityHeadline": {
+			"$cond": {
+				"if": { "$eq": [ "RecentActivity", "$objectType" ] },
+				"then": "$recentActivityHeadline",
+				"else": "$$REMOVE"
+			}}
+		,"recentActivityPinned": {
+			"$cond": {
+				"if": { "$eq": [ "RecentActivity", "$objectType" ] },
+				"then": "$recentActivityPinned",
+				"else": "$$REMOVE"
+			}}
+		,"recentActivityActive": {
+			"$cond": {
+				"if": { "$eq": [ "RecentActivity", "$objectType" ] },
+				"then": "$recentActivityActive",
+				"else": "$$REMOVE"
+			}}
+		,"projectName": "$projectObjects.name"
+		,"projectId": "$projectId"
+		,"_id":"$_id"
+		,"meta":"$meta"
+		,"write":"$write"
+		,"performedBy":"$performedBy"
+		,"_objectSchema":"$_objectSchema"
+	}}
+	,{"$limit":2000}
+]
