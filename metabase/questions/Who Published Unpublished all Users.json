@@ -1,6 +1,5 @@
 [
-	{"$match": {"performedBy":{"$eq":"idir\\theidirusername"}}}
-	,{"$match": {"objId": {"$ne": null}}}
+	{"$match": {"objId": {"$ne": null}}}
 	,{"$match":{"$or":[{"action":{"$eq":"publish"}},{"action":{"$eq":"unPublish"}}]}}	
 	,{"$lookup": {
 		"from": "epic"
