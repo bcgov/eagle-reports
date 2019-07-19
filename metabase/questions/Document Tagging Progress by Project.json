@@ -1,0 +1,28 @@
+[{"$match": {"_schemaName": {"$eq": "Document"}}}
+,{"$lookup": {"from": "epic", "localField": "project", "foreignField": "_id", "as": "projectObjects" }}
+,{"$unwind":"$projectObjects"}
+,{"$project": { 
+    "_schemaName":"$_schemaName"
+    ,"projectName":"$projectObjects.name"
+    ,"isTagged":{ "$cond": { "if": { "$and": 
+        [
+            { "$ne": [ "$documentType", "" ] }
+            ,{ "$ne": [ "$documentType", null ] }
+            ,{ "$ne": [ "$milestone", "" ] }
+            ,{ "$ne": [ "$milestone", null ] }
+            ,{ "$ne": [ "$documentAuthor", "" ] }
+            ,{ "$ne": [ "$documentAuthor", null ] }
+        ]},
+        "then": "Tagged",
+        "else": "Untagged"
+        }}
+    }}
+,{"$group":{"_id":{"projectName":"$projectName","isTagged":"$isTagged"},"count":{"$sum":1}}}
+,{ "$project": {
+    "_id":0
+    ,"projectName":"$_id.projectName"
+    ,"status": "$_id.isTagged"
+    ,"count":"$count"
+    }}
+,{"$sort":{"projectName":1, "status":1}}
+]

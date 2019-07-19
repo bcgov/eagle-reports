@@ -74,16 +74,11 @@
 	,{"$unwind": "$projectObjects"}
 	,{"$sort":{"timestamp":-1}}
 	,{"$project": {
-		"updatedBy":"$updatedBy"
-		,"addedBy":"$addedBy"
-		,"delete":"$delete"
-		,"_schemaName":"$_schemaName"
-		,"timestamp":"$timestamp"
-		,"read":"$read"
-		,"action":"$action"
-		,"deletedBy":"$deletedBy"
-		,"objectId":"$objectId"
+		"timestamp":"$timestamp"
 		,"objectType": "$objectType"
+		,"projectName": "$projectObjects.name"
+		,"action":"$action"
+		,"performedBy":"$performedBy"
 		,"documentDisplayName": {
 			"$cond": {
 				"if": { "$eq": [ "Document", "$objectType" ] },
@@ -94,30 +89,6 @@
 			"$cond": {
 				"if": { "$eq": [ "Comment", "$objectType" ] },
 				"then": "$commentStatus",
-				"else": {"$literal":""}
-			}}
-		,"commentPeriodIsClassified": {
-			"$cond": {
-				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
-				"then": "$commentPeriodIsClassified",
-				"else": {"$literal":""}
-			}}
-		,"commentPeriodIsPublished": {
-			"$cond": {
-				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
-				"then": "$commentPeriodIsPublished",
-				"else": {"$literal":""}
-			}}
-		,"commentPeriodIsResolved": {
-			"$cond": {
-				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
-				"then": "$commentPeriodIsResolved",
-				"else": {"$literal":""}
-			}}
-		,"commentPeriodIsVetted": {
-			"$cond": {
-				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
-				"then": "$commentPeriodIsVetted",
 				"else": {"$literal":""}
 			}}
 		,"recentActivityHeadline": {
@@ -138,13 +109,42 @@
 				"then": "$recentActivityActive",
 				"else": {"$literal":""}
 			}}
-		,"projectName": "$projectObjects.name"
+		,"commentPeriodIsResolved": {
+			"$cond": {
+				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
+				"then": "$commentPeriodIsResolved",
+				"else": {"$literal":""}
+			}}
+		,"commentPeriodIsPublished": {
+			"$cond": {
+				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
+				"then": "$commentPeriodIsPublished",
+				"else": {"$literal":""}
+			}}
+		,"commentPeriodIsVetted": {
+			"$cond": {
+				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
+				"then": "$commentPeriodIsVetted",
+				"else": {"$literal":""}
+			}}
+		,"commentPeriodIsClassified": {
+			"$cond": {
+				"if": { "$eq": [ "CommentPeriod", "$objectType" ] },
+				"then": "$commentPeriodIsClassified",
+				"else": {"$literal":""}
+			}}
+		,"deletedBy":"$deletedBy"
+		,"updatedBy":"$updatedBy"
+		,"addedBy":"$addedBy"
+		,"_objectSchema":"$_objectSchema"
+		,"_schemaName":"$_schemaName"
+		,"objectId":"$objectId"
 		,"projectId": "$projectId"
 		,"_id":"$_id"
 		,"meta":"$meta"
+		,"read":"$read"
 		,"write":"$write"
-		,"performedBy":"$performedBy"
-		,"_objectSchema":"$_objectSchema"
+		,"delete":"$delete"
 	}}
 	,{"$limit":2000}
 ]
