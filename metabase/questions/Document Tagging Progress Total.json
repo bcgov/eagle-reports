@@ -1,22 +1,26 @@
-[{"$match": {"_schemaName": {"$eq": "Document"}}}
-,{"$project": { 
+[
+{"$match": {"_schemaName": {"$eq": "Document"}}}
+,{"$project": {
     "isTagged":{ "$cond": { "if": { "$and": 
         [
-            { "$ne": [ "$documentType", "" ] }
-            ,{ "$ne": [ "$documentType", null ] }
+            { "$ne": [ "$type", "" ] }
+            ,{ "$ne": [ "$type", null ] }
+            ,{ "$eq": [ {"$type": "$type"}, "objectId" ] }
             ,{ "$ne": [ "$milestone", "" ] }
             ,{ "$ne": [ "$milestone", null ] }
+            ,{ "$eq": [ {"$type": "$milestone"}, "objectId" ] }
             ,{ "$ne": [ "$documentAuthor", "" ] }
             ,{ "$ne": [ "$documentAuthor", null ] }
+            ,{ "$eq": [ {"$type": "$documentAuthor"}, "objectId" ] }
         ]},
         "then": "Tagged",
         "else": "Untagged"
         }}
     }}
-,{"$group":{"_id":"$isTagged","count":{"$sum":1}}}
+,{"$group":{"_id":{"projectName":"$projectName","isTagged":"$isTagged"},"count":{"$sum":1}}}
 ,{ "$project": {
     "_id":0
-    ,"status": "$_id"
+    ,"status": "$_id.isTagged"
     ,"count":"$count"
     }}
 ]
