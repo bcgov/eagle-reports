@@ -6,12 +6,15 @@
     ,"projectName":"$projectObjects.name"
     ,"isTagged":{ "$cond": { "if": { "$and": 
         [
-            { "$ne": [ "$documentType", "" ] }
-            ,{ "$ne": [ "$documentType", null ] }
+            { "$ne": [ "$type", "" ] }
+            ,{ "$ne": [ "$type", null ] }
+            ,{ "$eq": [ {"$type": "$type"}, "objectId" ] }
             ,{ "$ne": [ "$milestone", "" ] }
             ,{ "$ne": [ "$milestone", null ] }
+            ,{ "$eq": [ {"$type": "$milestone"}, "objectId" ] }
             ,{ "$ne": [ "$documentAuthor", "" ] }
             ,{ "$ne": [ "$documentAuthor", null ] }
+            ,{ "$eq": [ {"$type": "$documentAuthor"}, "objectId" ] }
         ]},
         "then": "Tagged",
         "else": "Untagged"
