@@ -1,31 +1,70 @@
-[{"$match": {"_schemaName": {"$eq": "Document"}}}
-,{"$lookup": {"from": "epic", "localField": "project", "foreignField": "_id", "as": "projectObjects" }}
-,{"$unwind":"$projectObjects"}
-,{"$project": { 
-    "_schemaName":"$_schemaName"
-    ,"projectName":"$projectObjects.name"
-    ,"isTagged":{ "$cond": { "if": { "$and": 
-        [
-            { "$ne": [ "$type", "" ] }
-            ,{ "$ne": [ "$type", null ] }
-            ,{ "$eq": [ {"$type": "$type"}, "objectId" ] }
-            ,{ "$ne": [ "$milestone", "" ] }
-            ,{ "$ne": [ "$milestone", null ] }
-            ,{ "$eq": [ {"$type": "$milestone"}, "objectId" ] }
-            ,{ "$ne": [ "$documentAuthor", "" ] }
-            ,{ "$ne": [ "$documentAuthor", null ] }
-            ,{ "$eq": [ {"$type": "$documentAuthor"}, "objectId" ] }
-        ]},
-        "then": "Tagged",
-        "else": "Untagged"
+[
+	{"$match": {"_schemaName":"Project"}}
+	,{"$project": {"name":"$name"}}
+    ,{"$lookup": {
+        "from": "epic"
+        ,"let": { "projectId": "$_id" }
+        ,"pipeline": [
+            {"$match": { "$expr":
+                    { "$and":
+                       [
+                         { "$eq": [ "$_schemaName",  "Document" ] },
+                         { "$eq": [ "$project", "$$projectId" ] }
+                       ]
+                    }
+                 }}
+            ,{"$project": { 
+            	"documentId":"$_id"
+                ,"project":"$project"
+                ,"isTagged":{ "$cond": { "if": { "$and": 
+                    [
+                        { "$ne": [ "$type", "" ] }
+                        ,{ "$ne": [ "$type", null ] }
+                        ,{ "$eq": [ {"$type": "$type"}, "objectId" ] }
+                        ,{ "$ne": [ "$milestone", "" ] }
+                        ,{ "$ne": [ "$milestone", null ] }
+                        ,{ "$eq": [ {"$type": "$milestone"}, "objectId" ] }
+                        ,{ "$ne": [ "$documentAuthor", "" ] }
+                        ,{ "$ne": [ "$documentAuthor", null ] }
+                        ,{ "$eq": [ {"$type": "$documentAuthor"}, "objectId" ] }
+                    ]},
+                    "then": "Tagged",
+                    "else": "Untagged"
+                    }}
+                }}
+            ,{"$group":{"_id":{"project":"$project","isTagged":"$isTagged"},"count":{"$sum":1}}}
+            ,{ "$project": {
+                "_id":0
+                ,"project":"$_id.project"
+                ,"status": "$_id.isTagged"
+                ,"count":"$count"
+                }}
+            ,{"$sort": {"project":1,"status":1}}
+           ]
+        , "as": "docStats" }}
+    ,{ "$project": {
+        "_id":0
+        ,"project":"$name"
+        ,"array0": { "$arrayElemAt": ["$docStats", 0] }
+        ,"array1": { "$arrayElemAt": ["$docStats", 1] }
         }}
-    }}
-,{"$group":{"_id":{"projectName":"$projectName","isTagged":"$isTagged"},"count":{"$sum":1}}}
-,{ "$project": {
-    "_id":0
-    ,"projectName":"$_id.projectName"
-    ,"status": "$_id.isTagged"
-    ,"count":"$count"
-    }}
-,{"$sort":{"projectName":1, "status":1}}
+    ,{ "$project": {
+        "_id":0
+        ,"project":"$project"
+        ,"tagged": {"$cond": [{"$eq": ["$array0.status", "Tagged"]}, "$array0.count", {"$cond": [{"$eq": ["$array1.status", "Tagged"]}, "$array1.count", 0]} ]}
+        ,"untagged": {"$cond": [{"$eq": ["$array0.status", "Untagged"]}, "$array0.count", {"$cond": [{"$eq": ["$array1.status", "Untagged"]}, "$array1.count", 0]} ]}
+        }}
+    ,{ "$project": {
+        "_id":0
+        ,"project":"$project"
+        ,"summaryCounts": [ {"status":"Tagged", "count":"$tagged"}, {"status":"Untagged", "count":"$untagged"} ]
+        }}
+    ,{"$unwind":"$summaryCounts"}
+    ,{ "$project": {
+        "_id":0
+        ,"projectName":"$project"
+        ,"status": "$summaryCounts.status"
+        ,"count": "$summaryCounts.count"
+        }}
+    ,{"$sort":{"projectName":1, "status":1}}
 ]
