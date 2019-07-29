@@ -79,7 +79,15 @@
 		,"addedBy":"$addedBy"
 		,"delete":"$delete"
 		,"_schemaName":"$_schemaName"
-		,"timestamp":"$timestamp"
+		,"timestamp": {"$dateFromParts": {
+			"year": {"$year": {"date":"$timestamp", "timezone":"America/Vancouver"}}
+			,"month": {"$month": {"date":"$timestamp", "timezone":"America/Vancouver"}}
+			,"day": {"$dayOfMonth": {"date":"$timestamp", "timezone":"America/Vancouver"}}
+			,"hour": {"$hour": {"date":"$timestamp", "timezone":"America/Vancouver"}}
+			,"minute": {"$minute": {"date":"$timestamp", "timezone":"America/Vancouver"}}
+			,"second": {"$second": {"date":"$timestamp", "timezone":"America/Vancouver"}}
+			,"millisecond": {"$millisecond": {"date":"$timestamp", "timezone":"America/Vancouver"}}
+			,"timezone": "UTC"}}
 		,"read":"$read"
 		,"action":"$action"
 		,"deletedBy":"$deletedBy"
