@@ -1,7 +1,8 @@
 [
 	{"$match": {"performedBy":{"$eq":"idir\\theidirusername"}}}
 	,{"$match": {"objId": {"$ne": null}}}
-	,{"$match":{"$or":[{"action":{"$eq":"publish"}},{"action":{"$eq":"unPublish"}}]}}	
+	,{"$addFields":{"lcaseAction":{"$toLower": "$action"}}}
+	,{"$match":{"lcaseAction":{"$in":["publish","unpublish"]}}}
 	,{"$lookup": {
 		"from": "epic"
 		,"let": { "epicId": "$objId" }
@@ -33,7 +34,7 @@
 		,"_schemaName":"$_schemaName"
 		,"timestamp":"$timestamp"
 		,"read":"$read"
-		,"action":"$action"
+		,"action":"$lcaseAction"
 		,"deletedBy":"$deletedBy"
 		,"objectId":"$objId"
 		,"objectType": "$epicObjects.objectType"
