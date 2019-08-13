@@ -62,8 +62,8 @@
 				{ "$expr":
 					{ "$and":
 						[
-							{ "$eq": [ "$_id",  "$$epicId" ] },
-							{ "$eq": [ "$_schemaName", "Project" ] }
+							{ "$eq": [ "$_id",  "$$epicId" ] }
+							,{ "$eq": [ {"$toLower": "$_schemaName"},  "project" ] }
 						]
 					}
 				}

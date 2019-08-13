@@ -1,5 +1,7 @@
 [
-	{"$match": {"_schemaName":"Project"}}
+	{"$match": { "$expr":
+        { "$eq": [ {"$toLower": "$_schemaName"},  "project" ] }
+     }}
 	,{"$project": {"name":"$name"}}
     ,{"$lookup": {
         "from": "epic"
@@ -8,8 +10,9 @@
             {"$match": { "$expr":
                     { "$and":
                        [
-                         { "$eq": [ "$_schemaName",  "Document" ] },
-                         { "$eq": [ "$project", "$$projectId" ] }
+                         { "$eq": [ {"$toLower": "$_schemaName"},  "document" ] }
+                         ,{ "$eq": [ "$project", "$$projectId" ] }
+                         ,{ "$eq": [ {"$toLower": "$documentSource"}, "project" ] }
                        ]
                     }
                  }}
@@ -24,9 +27,9 @@
                         ,{ "$ne": [ "$milestone", "" ] }
                         ,{ "$ne": [ "$milestone", null ] }
                         ,{ "$eq": [ {"$type": "$milestone"}, "objectId" ] }
-                        ,{ "$ne": [ "$documentAuthor", "" ] }
-                        ,{ "$ne": [ "$documentAuthor", null ] }
-                        ,{ "$eq": [ {"$type": "$documentAuthor"}, "objectId" ] }
+                        ,{ "$ne": [ "$documentAuthorType", "" ] }
+                        ,{ "$ne": [ "$documentAuthorType", null ] }
+                        ,{ "$eq": [ {"$type": "$documentAuthorType"}, "objectId" ] }
                     ]},
                     "then": "Tagged",
                     "else": "Untagged"
