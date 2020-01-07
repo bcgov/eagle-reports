@@ -2,7 +2,29 @@
 	{"$match": { "$expr":
         { "$eq": [ {"$toLower": "$_schemaName"},  "project" ] }
      }}
-	,{"$project": {"name":"$name"}}
+  ,{
+    "$addFields": {
+      "default": {
+        "$switch": {
+          "branches": [
+            {
+              "case": { "$eq": [ "$currentLegislationYear", "legislation_1996" ]},
+              "then": "$legislation_1996"
+            },
+            {
+              "case": { "$eq": [ "$currentLegislationYear", "legislation_2002" ]},
+              "then": "$legislation_2002"
+            },
+            {
+              "case": { "$eq": [ "$currentLegislationYear", "legislation_2018" ]},
+              "then": "$legislation_2018"
+            }
+          ], "default": "$legislation_2002"
+        }
+      }
+    }
+  }
+	,{"$project": {"name":"$default.name"}}
     ,{"$lookup": {
         "from": "epic"
         ,"let": { "projectId": "$_id" }
