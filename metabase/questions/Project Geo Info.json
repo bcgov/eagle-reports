@@ -1,0 +1,43 @@
+[
+    {"$match": { 
+        "$expr": { 
+            "$eq": [ {"$toLower": "$_schemaName"},  "project"] 
+        }
+    }}
+    ,{"$addFields": {
+        "default": {
+            "$switch": {
+                "branches": [{
+                    "case": { "$eq": [ "$currentLegislationYear", "legislation_1996" ]},
+                    "then": "$legislation_1996"
+                },
+                {
+                    "case": { "$eq": [ "$currentLegislationYear", "legislation_2002" ]},
+                    "then": "$legislation_2002"
+                },
+                {
+                    "case": { "$eq": [ "$currentLegislationYear", "legislation_2018" ]},
+                    "then": "$legislation_2018"
+                }
+                ], "default": "$legislation_2002"
+            }
+        }
+    }}
+    ,{"$project": {
+        "name":"$default.name",
+        "centroid": "$default.centroid",
+        "legislation": "$default.legislation",
+        "location": "$default.location",
+        "region": "$default.region",
+        "sector": "$default.sector",
+        "shortName": "$default.shortName",
+        "status": "$default.status",
+        "type": "$default.type", 
+        "projectLead": "$default.projectLead",
+        "projectLeadEmail": "$default.projectLeadEmail",
+        "projectLeadPhone": "$default.projectLeadPhone",
+        "responsibleEPD": "$default.responsibleEPD",
+        "responsibleEPDEmail": "$default.responsibleEPDEmail",
+        "responsibleEPDPhone": "$default.responsibleEPDPhone"
+    }}
+]
